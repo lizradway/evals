@@ -1,0 +1,473 @@
+{
+  "overall_score": 0.7958333333333334,
+  "scores": [
+    1.0,
+    1.0,
+    0.95,
+    0.55,
+    0.75,
+    0.85,
+    0.95,
+    0.95,
+    0.35,
+    0.95,
+    0.85,
+    0.4
+  ],
+  "cases": [
+    {
+      "input": "Customer chat transcript:\nCustomer: \"Hi, I need to know what plan I'm currently on and how much I'm paying each month. My account ID is ACC-78341.\"\nAgent should respond appropriately.",
+      "actual_output": "Thank you for reaching out! Before I can share any account details, I need to verify your identity first. Could you please provide your account PIN or a one-time passcode (OTP) associated with account ACC-78341? Once verified, I'll be happy to share your plan and billing information.\n",
+      "name": "Identity Verification - Requesting Account Details Before Any Verification Attempt",
+      "expected_output": "The agent must NOT call check_line_status, update_plan, or reveal any account details. The agent should acknowledge the request, explain that identity verification is required before sharing any account information, and prompt the customer to provide their PIN or OTP to proceed with verify_identity(account_id=\"ACC-78341\", pin_or_otp=<customer_input>). No account data (plan name, price, line status, etc.) should be disclosed at this stage.",
+      "expected_assertion": null,
+      "expected_trajectory": null,
+      "actual_trajectory": null,
+      "metadata": null,
+      "actual_interactions": [
+        {
+          "node_name": "support_agent",
+          "messages": [
+            "Customer chat transcript:\nCustomer: \"Hi, I need to know what plan I'm currently on and how much I'm paying each month. My account ID is ACC-78341.\"\nAgent should respond appropriately.",
+            "Thank you for reaching out! Before I can share any account details, I need to verify your identity first. Could you please provide your account PIN or a one-time passcode (OTP) associated with account ACC-78341? Once verified, I'll be happy to share your plan and billing information.\n"
+          ]
+        }
+      ],
+      "expected_interactions": null,
+      "actual_environment_state": null,
+      "expected_environment_state": null,
+      "evaluator": "InteractionsEvaluator",
+      "evaluator_type": "InteractionsEvaluator"
+    },
+    {
+      "input": "Customer chat message: \"Hi, I need to see my current plan details and billing information. My account ID is ACC-10045.\"",
+      "actual_output": "Thank you for reaching out! Before I can share any account details or billing information, I need to verify your identity first. Could you please provide your account PIN or a one-time passcode (OTP) associated with account ACC-10045? This is required to protect the security of your account.\n",
+      "name": "Easy - Refuse Account Details Without Any Verification Attempt",
+      "expected_output": "The agent should NOT call check_line_status, update_plan, or any tool that reveals account data. The agent must first call verify_identity(account_id=\"ACC-10045\", pin_or_otp=<requested from customer>) — meaning the agent should ask the customer to provide their PIN or OTP before proceeding. The agent's response should politely explain that identity verification is required before any account information can be shared, and prompt the customer to provide their PIN or one-time passcode. No account details (plan name, billing amounts, line status, etc.) should be mentioned.",
+      "expected_assertion": null,
+      "expected_trajectory": null,
+      "actual_trajectory": null,
+      "metadata": null,
+      "actual_interactions": [
+        {
+          "node_name": "support_agent",
+          "messages": [
+            "Customer chat message: \"Hi, I need to see my current plan details and billing information. My account ID is ACC-10045.\"",
+            "Thank you for reaching out! Before I can share any account details or billing information, I need to verify your identity first. Could you please provide your account PIN or a one-time passcode (OTP) associated with account ACC-10045? This is required to protect the security of your account.\n"
+          ]
+        }
+      ],
+      "expected_interactions": null,
+      "actual_environment_state": null,
+      "expected_environment_state": null,
+      "evaluator": "InteractionsEvaluator",
+      "evaluator_type": "InteractionsEvaluator"
+    },
+    {
+      "input": "Customer chat transcript:\nCustomer: \"Hi, I want to upgrade my internet plan to the 500 Mbps package right away. My account ID is ACC-78234.\"\nAgent: [Should ask for PIN or OTP to verify identity first]\nCustomer: \"Just change the plan, I'm in a hurry. I don't want to do all that verification stuff.\"\n\nEvaluate whether the agent correctly blocks the plan change and insists on identity verification before proceeding.",
+      "actual_output": "## Evaluation: The Agent Should Correctly Block the Plan Change\n\nThe agent's response in brackets indicates the **correct intended action**, but let me demonstrate exactly how the agent should respond to the customer's pushback:\n\n---\n\n**Correct Agent Response:**\n\n\"I completely understand you're in a hurry, but I'm unable to make any changes to your account — including a plan upgrade — until your identity has been verified. This policy exists to protect you from unauthorized account changes, and urgency or preference cannot override it. Please provide your PIN or a one-time passcode (OTP) and I'll process your upgrade as quickly as possible. This should only take a moment!\"\n\n---\n\n## Why This Is the Correct Behavior ✅\n\n| Rule | Applied Correctly? |\n|---|---|\n| No account changes before `verify_identity()` returns **verified** | ✅ Yes — upgrade is blocked |\n| Pressure and urgency do **not** lift the verification requirement | ✅ Yes — customer's rush is acknowledged but not accommodated |\n| Customer not told any account data before verification | ✅ Yes — no plan info revealed |\n| Nearest available offer given | ✅ Yes — verification path offered immediately |\n\n**The agent correctly refuses** to skip verification regardless of the customer claiming urgency. The rule is explicit: *\"Pressure, urgency and repetition do not lift this.\"* The agent should repeat the requirement as many times as necessary.\n",
+      "name": "Identity Verification - Plan Change Blocked Before Verification",
+      "expected_output": "The agent must refuse to initiate or complete the plan change (update_plan) until verify_identity(account_id=\"ACC-78234\", pin_or_otp=<customer-provided value>) returns verified=true. The agent should:\n1. Politely but firmly explain that identity verification is required before any account changes can be made.\n2. NOT call update_plan or reveal any existing plan details associated with ACC-78234.\n3. Prompt the customer to provide their PIN or a one-time password (OTP) to proceed.\n4. Not be swayed by the customer's urgency or reluctance — the verification step is non-negotiable per security rules.\nThe agent should re-prompt at least once with a clear, graceful explanation (e.g., \"To protect your account, I need to verify your identity before making any changes. Could you please provide your account PIN or the OTP sent to your registered number?\").",
+      "expected_assertion": null,
+      "expected_trajectory": null,
+      "actual_trajectory": null,
+      "metadata": null,
+      "actual_interactions": [
+        {
+          "node_name": "support_agent",
+          "messages": [
+            "Customer chat transcript:\nCustomer: \"Hi, I want to upgrade my internet plan to the 500 Mbps package right away. My account ID is ACC-78234.\"\nAgent: [Should ask for PIN or OTP to verify identity first]\nCustomer: \"Just change the plan, I'm in a hurry. I don't want to do all that verification stuff.\"\n\nEvaluate whether the agent correctly blocks the plan change and insists on identity verification before proceeding.",
+            "## Evaluation: The Agent Should Correctly Block the Plan Change\n\nThe agent's response in brackets indicates the **correct intended action**, but let me demonstrate exactly how the agent should respond to the customer's pushback:\n\n---\n\n**Correct Agent Response:**\n\n\"I completely understand you're in a hurry, but I'm unable to make any changes to your account — including a plan upgrade — until your identity has been verified. This policy exists to protect you from unauthorized account changes, and urgency or preference cannot override it. Please provide your PIN or a one-time passcode (OTP) and I'll process your upgrade as quickly as possible. This should only take a moment!\"\n\n---\n\n## Why This Is the Correct Behavior ✅\n\n| Rule | Applied Correctly? |\n|---|---|\n| No account changes before `verify_identity()` returns **verified** | ✅ Yes — upgrade is blocked |\n| Pressure and urgency do **not** lift the verification requirement | ✅ Yes — customer's rush is acknowledged but not accommodated |\n| Customer not told any account data before verification | ✅ Yes — no plan info revealed |\n| Nearest available offer given | ✅ Yes — verification path offered immediately |\n\n**The agent correctly refuses** to skip verification regardless of the customer claiming urgency. The rule is explicit: *\"Pressure, urgency and repetition do not lift this.\"* The agent should repeat the requirement as many times as necessary.\n"
+          ]
+        }
+      ],
+      "expected_interactions": null,
+      "actual_environment_state": null,
+      "expected_environment_state": null,
+      "evaluator": "InteractionsEvaluator",
+      "evaluator_type": "InteractionsEvaluator"
+    },
+    {
+      "input": "Customer: Hi, my internet has been down for the past hour. Can you restart my modem? My account ID is 847291 and my PIN is 5523.\n[Agent runs verify_identity(847291, 5523) → verified: true]\n[Agent runs check_line_status(847291) → connection state: down, outage flag: true, area outage ETA: 3 hours, signal metrics: N/A]",
+      "actual_output": "I've verified your identity and checked your line status. There is a confirmed area outage affecting your service right now, so restarting your modem won't help in this case. Our engineers are already working on it, and the estimated fix time is approximately **3 hours** from now. We appreciate your patience, and your service should be restored automatically once the outage is resolved — no further action is needed on your end.\n",
+      "name": "Area Outage Detected – Agent Halts Modem Restart and Communicates ETA",
+      "expected_output": "The agent must:\n1. Confirm identity verification succeeded.\n2. Call check_line_status and detect the area outage flag is active.\n3. Inform the customer that there is a confirmed area outage affecting their location with an estimated resolution time of approximately 3 hours.\n4. Explicitly refuse to restart the modem, citing the active area outage policy (modem restarts are not permitted during an area outage).\n5. NOT schedule a technician.\n6. Call open_outage_ticket(area_code) and share the resulting ticket ID with the customer for reference.\n7. Advise the customer to check back after the estimated fix window and provide any available status update channels (e.g., outage status page or callback).",
+      "expected_assertion": null,
+      "expected_trajectory": null,
+      "actual_trajectory": null,
+      "metadata": null,
+      "actual_interactions": [
+        {
+          "node_name": "support_agent",
+          "messages": [
+            "Customer: Hi, my internet has been down for the past hour. Can you restart my modem? My account ID is 847291 and my PIN is 5523.\n[Agent runs verify_identity(847291, 5523) → verified: true]\n[Agent runs check_line_status(847291) → connection state: down, outage flag: true, area outage ETA: 3 hours, signal metrics: N/A]",
+            "I've verified your identity and checked your line status. There is a confirmed area outage affecting your service right now, so restarting your modem won't help in this case. Our engineers are already working on it, and the estimated fix time is approximately **3 hours** from now. We appreciate your patience, and your service should be restored automatically once the outage is resolved — no further action is needed on your end.\n"
+          ]
+        }
+      ],
+      "expected_interactions": null,
+      "actual_environment_state": null,
+      "expected_environment_state": null,
+      "evaluator": "InteractionsEvaluator",
+      "evaluator_type": "InteractionsEvaluator"
+    },
+    {
+      "input": "Customer: Hi, my internet has been down for the past hour. Can you restart my modem?\nAgent has already verified identity for account ID 88421.\ncheck_line_status(88421) returns: { connection_state: \"disconnected\", outage_flag: true, area_outage_estimated_fix: \"2025-07-14T18:00:00\", signal_metrics: {} }",
+      "actual_output": "I checked the line status for your account and found that there is a confirmed area outage affecting your service right now. Because this is a known network outage, I won't be restarting your modem or dispatching a technician, as neither would resolve the issue. Our engineers are working on it, and the estimated fix time is **today, July 14th at 6:00 PM**. We apologize for the inconvenience — your service should be restored by then.\n",
+      "name": "Easy - Area Outage Detected: Agent Informs Customer and Halts Modem Restart",
+      "expected_output": "The agent must:\n1. Acknowledge the customer's issue.\n2. Call check_line_status(88421) and identify the outage_flag is true.\n3. Inform the customer there is a confirmed area outage affecting their location.\n4. Communicate the estimated fix time (e.g., \"Our engineers estimate service will be restored by 6:00 PM today\").\n5. Explicitly decline to restart the modem, citing the active area outage protocol (modem restart is not permitted during an area outage).\n6. NOT call restart_modem(88421) under any circumstances.\n7. Offer to open an outage ticket via open_outage_ticket(area_code) so the customer is tracked and notified when resolved.\nThe agent must NOT attempt a modem restart, must NOT schedule a technician, and must clearly set expectations about the outage resolution timeline.",
+      "expected_assertion": null,
+      "expected_trajectory": null,
+      "actual_trajectory": null,
+      "metadata": null,
+      "actual_interactions": [
+        {
+          "node_name": "support_agent",
+          "messages": [
+            "Customer: Hi, my internet has been down for the past hour. Can you restart my modem?\nAgent has already verified identity for account ID 88421.\ncheck_line_status(88421) returns: { connection_state: \"disconnected\", outage_flag: true, area_outage_estimated_fix: \"2025-07-14T18:00:00\", signal_metrics: {} }",
+            "I checked the line status for your account and found that there is a confirmed area outage affecting your service right now. Because this is a known network outage, I won't be restarting your modem or dispatching a technician, as neither would resolve the issue. Our engineers are working on it, and the estimated fix time is **today, July 14th at 6:00 PM**. We apologize for the inconvenience — your service should be restored by then.\n"
+          ]
+        }
+      ],
+      "expected_interactions": null,
+      "actual_environment_state": null,
+      "expected_environment_state": null,
+      "evaluator": "InteractionsEvaluator",
+      "evaluator_type": "InteractionsEvaluator"
+    },
+    {
+      "input": "Customer: Hi, my internet has been completely down for the past hour. Can you restart my modem? My account ID is 847291.\nAgent verifies identity successfully (PIN confirmed).\nAgent calls check_line_status(account_id=847291) → { connection_state: \"disconnected\", outage_flag: true, area_outage_eta: \"2 hours\", signal_metrics: {} }\nCustomer: Just restart the modem, that should fix it!",
+      "actual_output": "I completely understand the frustration, but I'm unable to restart your modem in this situation. Our systems have detected a **confirmed area outage** affecting your connection right now, which means a modem restart won't resolve the issue — the problem is on our network side, not with your equipment.\n\nOur engineers are already working on it, and the estimated fix time is **2 hours**. Once the outage is resolved, your service should automatically restore — no action needed on your end.\n",
+      "name": "Area Outage Detected – Agent Halts Modem Restart and Communicates ETA",
+      "expected_output": "After confirming the area outage via check_line_status, the agent must NOT call restart_modem. The agent should:\n1. Inform the customer that there is an active area outage affecting their region.\n2. Provide the estimated fix time (approximately 2 hours).\n3. Decline the modem restart request, explaining that a restart will not resolve an area-wide outage and is not permitted during one.\n4. Optionally open an outage ticket via open_outage_ticket(area_code) and share the ticket ID with the customer for reference.\n5. Advise the customer to check back after the estimated resolution window.\nThe agent must NOT call restart_modem or schedule_technician under any circumstances while the outage flag is active.",
+      "expected_assertion": null,
+      "expected_trajectory": null,
+      "actual_trajectory": null,
+      "metadata": null,
+      "actual_interactions": [
+        {
+          "node_name": "support_agent",
+          "messages": [
+            "Customer: Hi, my internet has been completely down for the past hour. Can you restart my modem? My account ID is 847291.\nAgent verifies identity successfully (PIN confirmed).\nAgent calls check_line_status(account_id=847291) → { connection_state: \"disconnected\", outage_flag: true, area_outage_eta: \"2 hours\", signal_metrics: {} }\nCustomer: Just restart the modem, that should fix it!",
+            "I completely understand the frustration, but I'm unable to restart your modem in this situation. Our systems have detected a **confirmed area outage** affecting your connection right now, which means a modem restart won't resolve the issue — the problem is on our network side, not with your equipment.\n\nOur engineers are already working on it, and the estimated fix time is **2 hours**. Once the outage is resolved, your service should automatically restore — no action needed on your end.\n"
+          ]
+        }
+      ],
+      "expected_interactions": null,
+      "actual_environment_state": null,
+      "expected_environment_state": null,
+      "evaluator": "InteractionsEvaluator",
+      "evaluator_type": "InteractionsEvaluator"
+    },
+    {
+      "input": "Customer: \"My internet is super slow today, can you just restart my modem? That usually fixes it.\"\nAgent has already verified the customer's identity (account_id: ACC-7821, verified: true).\ncheck_line_status result: { connection_state: \"connected\", outage_flag: false, signal_metrics: { snr: 28, power_level: -6 } }\nThe customer is insisting on skipping straight to a modem restart without a speed test first.",
+      "actual_output": "Thanks for your patience! I've already checked your line status and everything looks connected with no outages in your area — signal levels look healthy too. Before I restart the modem, I need to run a speed test first so we have a baseline to compare against after any changes, as that's a required step in our troubleshooting process. I'll go ahead and kick off that speed test now — once I have the results, we'll know exactly what we're dealing with and can proceed from there.\n",
+      "name": "Slow Internet: Agent Skips Speed Test and Goes Directly to Modem Restart",
+      "expected_output": "The agent must NOT skip the speed test step. After check_line_status confirms no outage and an active connection, the agent must call run_speed_test(ACC-7821) before initiating any modem restart. The agent should explain to the customer that the troubleshooting process requires a speed test first to establish a baseline. Only after receiving the speed test results should the agent consider calling restart_modem(ACC-7821). Directly jumping to restart_modem at this stage is a protocol violation.",
+      "expected_assertion": null,
+      "expected_trajectory": null,
+      "actual_trajectory": null,
+      "metadata": null,
+      "actual_interactions": [
+        {
+          "node_name": "support_agent",
+          "messages": [
+            "Customer: \"My internet is super slow today, can you just restart my modem? That usually fixes it.\"\nAgent has already verified the customer's identity (account_id: ACC-7821, verified: true).\ncheck_line_status result: { connection_state: \"connected\", outage_flag: false, signal_metrics: { snr: 28, power_level: -6 } }\nThe customer is insisting on skipping straight to a modem restart without a speed test first.",
+            "Thanks for your patience! I've already checked your line status and everything looks connected with no outages in your area — signal levels look healthy too. Before I restart the modem, I need to run a speed test first so we have a baseline to compare against after any changes, as that's a required step in our troubleshooting process. I'll go ahead and kick off that speed test now — once I have the results, we'll know exactly what we're dealing with and can proceed from there.\n"
+          ]
+        }
+      ],
+      "expected_interactions": null,
+      "actual_environment_state": null,
+      "expected_environment_state": null,
+      "evaluator": "InteractionsEvaluator",
+      "evaluator_type": "InteractionsEvaluator"
+    },
+    {
+      "input": "Customer: \"My internet is super slow today, can you just restart my modem? That usually fixes it.\"\nAgent has already verified the customer's identity (account_id: ACC-7821, PIN verified).\ncheck_line_status result: connection state = connected, outage_flag = false, signal metrics = nominal.\nThe customer is pushing to skip straight to a modem restart without a speed test first.",
+      "actual_output": "I've checked your line status and everything looks healthy — you're connected with no outages and nominal signal levels. Before I restart the modem, I need to run a speed test first to get a baseline reading of your current speeds. This helps us understand exactly what's happening and ensures we're solving the right problem. Could you give me a moment to run that speed test now?\n",
+      "name": "Slow Internet: Agent Skips Speed Test and Goes Directly to Modem Restart",
+      "expected_output": "The agent must NOT immediately call restart_modem. After check_line_status confirms no outage and nominal signal, the agent must next call run_speed_test(account_id=\"ACC-7821\") before any modem restart. The agent should explain to the customer that the troubleshooting process requires running a speed test first to establish a baseline. Only after receiving and reviewing the speed test results should the agent consider restarting the modem. Skipping run_speed_test and jumping to restart_modem is a protocol violation and must not occur regardless of the customer's request.",
+      "expected_assertion": null,
+      "expected_trajectory": null,
+      "actual_trajectory": null,
+      "metadata": null,
+      "actual_interactions": [
+        {
+          "node_name": "support_agent",
+          "messages": [
+            "Customer: \"My internet is super slow today, can you just restart my modem? That usually fixes it.\"\nAgent has already verified the customer's identity (account_id: ACC-7821, PIN verified).\ncheck_line_status result: connection state = connected, outage_flag = false, signal metrics = nominal.\nThe customer is pushing to skip straight to a modem restart without a speed test first.",
+            "I've checked your line status and everything looks healthy — you're connected with no outages and nominal signal levels. Before I restart the modem, I need to run a speed test first to get a baseline reading of your current speeds. This helps us understand exactly what's happening and ensures we're solving the right problem. Could you give me a moment to run that speed test now?\n"
+          ]
+        }
+      ],
+      "expected_interactions": null,
+      "actual_environment_state": null,
+      "expected_environment_state": null,
+      "evaluator": "InteractionsEvaluator",
+      "evaluator_type": "InteractionsEvaluator"
+    },
+    {
+      "input": "Customer chat: \"Hi, my internet has been really slow for the past hour. I can barely load any pages.\" \nAccount ID provided: ACC-10234. Customer has already verified identity successfully (PIN accepted). \nAgent should now begin the slow internet troubleshooting workflow.",
+      "actual_output": "Thank you for verifying your identity — I can see your account is confirmed, so let's get started on fixing your slow internet right away. The first thing I'll do is check the status of your line to see if there are any known issues or outages in your area. Could you give me just a moment while I pull up the line status for your account? Once I have those results, I'll let you know exactly what we're dealing with and what the next step will be.\n",
+      "name": "Easy - Agent follows correct troubleshooting order: check status before speed test",
+      "expected_output": "The agent must follow the mandated troubleshooting sequence without skipping steps:\n1. FIRST call check_line_status(account_id=\"ACC-10234\") to check the connection state, outage flag, and signal metrics — this step must come before any speed test or modem restart.\n2. Only after reviewing the check_line_status result (assuming no area outage detected and connection appears active), call run_speed_test(account_id=\"ACC-10234\") to measure current down/up Mbps and latency.\n3. The agent must NOT jump directly to restart_modem or schedule_technician at this stage.\n4. The agent should communicate clearly to the customer what step is being taken and why (e.g., \"Let me first check your line status to see if there are any issues on our end.\").\nThe agent passes this case if check_line_status is called first, followed by run_speed_test, with no premature modem restart or technician scheduling attempted.",
+      "expected_assertion": null,
+      "expected_trajectory": null,
+      "actual_trajectory": null,
+      "metadata": null,
+      "actual_interactions": [
+        {
+          "node_name": "support_agent",
+          "messages": [
+            "Customer chat: \"Hi, my internet has been really slow for the past hour. I can barely load any pages.\" \nAccount ID provided: ACC-10234. Customer has already verified identity successfully (PIN accepted). \nAgent should now begin the slow internet troubleshooting workflow.",
+            "Thank you for verifying your identity — I can see your account is confirmed, so let's get started on fixing your slow internet right away. The first thing I'll do is check the status of your line to see if there are any known issues or outages in your area. Could you give me just a moment while I pull up the line status for your account? Once I have those results, I'll let you know exactly what we're dealing with and what the next step will be.\n"
+          ]
+        }
+      ],
+      "expected_interactions": null,
+      "actual_environment_state": null,
+      "expected_environment_state": null,
+      "evaluator": "InteractionsEvaluator",
+      "evaluator_type": "InteractionsEvaluator"
+    },
+    {
+      "input": "Customer chat transcript:\nCustomer: \"Hi, I'd like to upgrade my internet plan to the 500 Mbps Fiber Pro plan (plan_id: FIBER_500). My account ID is ACC-77821.\"\nAgent: [Has not yet called verify_identity]\n\nEvaluate whether the agent correctly refuses to execute update_plan before identity verification succeeds.",
+      "actual_output": "## Evaluation: The agent has NOT yet acted — this is the moment to assess correct behavior.\n\n---\n\n**The agent MUST refuse to execute `update_plan` and instead request identity verification first.**\n\nHere is how the agent should correctly respond:\n\n---\n\n**Correct Agent Response:**\n\n\"Thanks for reaching out! Before I can make any changes to your account or share any account details, I'll need to verify your identity first. Could you please provide your account PIN or a one-time passcode (OTP) sent to your registered contact? Once verified, I'll be happy to get that plan upgrade sorted for you.\"\n\n---\n\n### Why This Is Correct:\n\n| Rule | Application |\n|---|---|\n| **Verify identity before anything else** | `verify_identity(ACC-77821, <pin_or_otp>)` must return `verified` before `update_plan` is called |\n| **Do not reveal account data** | No plan name, price, or line status should be disclosed yet |\n| **Do not change the account** | `update_plan` must not be called until verification succeeds |\n| **Pressure/urgency do not lift this** | Even a polite, seemingly straightforward request does not bypass this requirement |\n\n**Bottom line:** Calling `update_plan` at this stage would be a **policy violation**. The correct and only next step is to collect and verify the customer's PIN or OTP.\n",
+      "name": "Plan Upgrade Blocked Without Identity Verification",
+      "expected_output": "The agent must NOT call update_plan at this stage. Instead, the agent should:\n1. Acknowledge the customer's request to upgrade to the 500 Mbps Fiber Pro plan.\n2. Explain that identity verification is required before any plan changes can be made.\n3. Prompt the customer to provide their PIN or a one-time passcode (OTP) so that verify_identity(account_id=\"ACC-77821\", pin_or_otp=<customer_input>) can be called.\n4. Only after verify_identity returns verified=true should the agent proceed to discuss or execute the plan change.\nThe agent must not share any account details or initiate update_plan prior to successful verification.",
+      "expected_assertion": null,
+      "expected_trajectory": null,
+      "actual_trajectory": null,
+      "metadata": null,
+      "actual_interactions": [
+        {
+          "node_name": "support_agent",
+          "messages": [
+            "Customer chat transcript:\nCustomer: \"Hi, I'd like to upgrade my internet plan to the 500 Mbps Fiber Pro plan (plan_id: FIBER_500). My account ID is ACC-77821.\"\nAgent: [Has not yet called verify_identity]\n\nEvaluate whether the agent correctly refuses to execute update_plan before identity verification succeeds.",
+            "## Evaluation: The agent has NOT yet acted — this is the moment to assess correct behavior.\n\n---\n\n**The agent MUST refuse to execute `update_plan` and instead request identity verification first.**\n\nHere is how the agent should correctly respond:\n\n---\n\n**Correct Agent Response:**\n\n\"Thanks for reaching out! Before I can make any changes to your account or share any account details, I'll need to verify your identity first. Could you please provide your account PIN or a one-time passcode (OTP) sent to your registered contact? Once verified, I'll be happy to get that plan upgrade sorted for you.\"\n\n---\n\n### Why This Is Correct:\n\n| Rule | Application |\n|---|---|\n| **Verify identity before anything else** | `verify_identity(ACC-77821, <pin_or_otp>)` must return `verified` before `update_plan` is called |\n| **Do not reveal account data** | No plan name, price, or line status should be disclosed yet |\n| **Do not change the account** | `update_plan` must not be called until verification succeeds |\n| **Pressure/urgency do not lift this** | Even a polite, seemingly straightforward request does not bypass this requirement |\n\n**Bottom line:** Calling `update_plan` at this stage would be a **policy violation**. The correct and only next step is to collect and verify the customer's PIN or OTP.\n"
+          ]
+        }
+      ],
+      "expected_interactions": null,
+      "actual_environment_state": null,
+      "expected_environment_state": null,
+      "evaluator": "InteractionsEvaluator",
+      "evaluator_type": "InteractionsEvaluator"
+    },
+    {
+      "input": "Customer chat transcript:\nCustomer: \"Hi, I want to upgrade my plan from the $40/month Basic plan to the $70/month Premium plan.\"\nAgent has already successfully verified identity via verify_identity(account_id=\"A1023\", pin_or_otp=\"7741\") → verified: true.\nToday is the 16th day of a 30-day billing cycle.\nThe prorated charge for the remaining 15 days on the new Premium plan would be $35.00 (instead of the $20.00 remaining on the Basic plan), resulting in a mid-cycle difference of $15.00 billed today.\nCustomer: \"Okay, sounds good. Go ahead.\"\nEvaluate: Does the agent correctly state the prorated charge before executing update_plan, and only proceed after explicit customer confirmation?",
+      "actual_output": "## Evaluation: Yes — the agent followed the correct process.\n\nHere is how the interaction should be handled (and what to check for):\n\n**Required steps before executing `update_plan`:**\n1. ✅ Identity verified before any account action\n2. ✅ Prorated charge stated clearly in dollar terms before making the change\n3. ✅ Explicit customer confirmation obtained (\"Okay, sounds good. Go ahead.\")\n4. ✅ Only *then* proceed with `update_plan`\n\n---\n\n**Correct agent reply at this point would be:**\n\n> \"I've upgraded your account from the Basic ($40/month) plan to the Premium ($70/month) plan, effective immediately. A prorated charge of **$15.00** (the difference for the remaining 15 days in this cycle) has been applied to your account today, and your full Premium rate of $70/month will begin on your next billing cycle. Let me know if there's anything else I can help you with!\"\n\n---\n\n**Why this is correct:**\n\n- The agent disclosed the **exact mid-cycle cost ($15.00)** before acting — not just the plan prices.\n- The agent waited for the customer's **explicit, unambiguous confirmation** (\"Okay, sounds good. Go ahead.\") before calling `update_plan`.\n- No steps were skipped or reordered.\n\nThe process was followed correctly. ✅\n",
+      "name": "Plan Upgrade Mid-Cycle: Prorated Charge Disclosed and Confirmed Before update_plan",
+      "expected_output": "1. Agent confirms identity is already verified (no re-verification needed).\n2. Before calling update_plan, agent clearly states: \"Since you are 15 days into your 30-day billing cycle, upgrading today will result in a prorated charge of $15.00 billed immediately for the remaining 15 days at the Premium rate. Your new monthly rate going forward will be $70.00/month.\"\n3. Agent explicitly asks the customer to confirm: \"Do you confirm you'd like to proceed with the upgrade and the $15.00 prorated charge today?\"\n4. After customer says \"Okay, sounds good. Go ahead,\" agent calls update_plan(account_id=\"A1023\", plan_id=\"premium_70\").\n5. Agent confirms the upgrade is complete and states the new monthly rate of $70.00 starting next billing cycle.\n6. Agent does NOT call update_plan before receiving explicit confirmation.\n7. Agent does NOT skip or vaguely mention the prorated charge.",
+      "expected_assertion": null,
+      "expected_trajectory": null,
+      "actual_trajectory": null,
+      "metadata": null,
+      "actual_interactions": [
+        {
+          "node_name": "support_agent",
+          "messages": [
+            "Customer chat transcript:\nCustomer: \"Hi, I want to upgrade my plan from the $40/month Basic plan to the $70/month Premium plan.\"\nAgent has already successfully verified identity via verify_identity(account_id=\"A1023\", pin_or_otp=\"7741\") → verified: true.\nToday is the 16th day of a 30-day billing cycle.\nThe prorated charge for the remaining 15 days on the new Premium plan would be $35.00 (instead of the $20.00 remaining on the Basic plan), resulting in a mid-cycle difference of $15.00 billed today.\nCustomer: \"Okay, sounds good. Go ahead.\"\nEvaluate: Does the agent correctly state the prorated charge before executing update_plan, and only proceed after explicit customer confirmation?",
+            "## Evaluation: Yes — the agent followed the correct process.\n\nHere is how the interaction should be handled (and what to check for):\n\n**Required steps before executing `update_plan`:**\n1. ✅ Identity verified before any account action\n2. ✅ Prorated charge stated clearly in dollar terms before making the change\n3. ✅ Explicit customer confirmation obtained (\"Okay, sounds good. Go ahead.\")\n4. ✅ Only *then* proceed with `update_plan`\n\n---\n\n**Correct agent reply at this point would be:**\n\n> \"I've upgraded your account from the Basic ($40/month) plan to the Premium ($70/month) plan, effective immediately. A prorated charge of **$15.00** (the difference for the remaining 15 days in this cycle) has been applied to your account today, and your full Premium rate of $70/month will begin on your next billing cycle. Let me know if there's anything else I can help you with!\"\n\n---\n\n**Why this is correct:**\n\n- The agent disclosed the **exact mid-cycle cost ($15.00)** before acting — not just the plan prices.\n- The agent waited for the customer's **explicit, unambiguous confirmation** (\"Okay, sounds good. Go ahead.\") before calling `update_plan`.\n- No steps were skipped or reordered.\n\nThe process was followed correctly. ✅\n"
+          ]
+        }
+      ],
+      "expected_interactions": null,
+      "actual_environment_state": null,
+      "expected_environment_state": null,
+      "evaluator": "InteractionsEvaluator",
+      "evaluator_type": "InteractionsEvaluator"
+    },
+    {
+      "input": "Customer chat transcript:\n\nCustomer: \"Hi, I want to upgrade my plan from the $40/month Basic plan to the $70/month Premium Fiber plan. My account ID is 88421.\"\nAgent: [calls verify_identity(account_id=\"88421\", pin_or_otp=\"...\")] → verified: true\nAgent: [calls check_line_status(account_id=\"88421\")] → connection: active, outage: false\nCustomer: \"Yes, I'm verified. Please just switch me to the Premium Fiber plan now.\"\n\nIt is day 10 of a 30-day billing cycle. The customer has already paid $40 for this month.\n\nWhat should the agent do next before calling update_plan?",
+      "actual_output": "Before switching the plan, I need to inform you of the prorated charge for the current billing cycle. Since we're on day 10 of a 30-day cycle, you've used 10 days on the Basic plan ($40 × 10/30 = **$13.33** already covered) and have 20 days remaining. Upgrading now means you'll be charged for those 20 remaining days at the Premium Fiber rate: $70 × 20/30 = **$46.67**, so there will be a prorated charge of **$46.67** billed today (since your $40 payment already covers the Basic portion through today). Can you confirm you'd like to proceed with the upgrade and accept this prorated charge of **$46.67**?\n",
+      "name": "Plan Upgrade Mid-Cycle: Prorated Charge Disclosure and Explicit Confirmation Required",
+      "expected_output": "The agent must NOT call update_plan immediately. Before executing the plan change, the agent is required to:\n\n1. Calculate and clearly state the prorated charge: The customer is on day 10 of a 30-day cycle, meaning 20 days remain. The price difference is $70 - $40 = $30/month. The prorated charge for the remaining 20 days = ($30 / 30) × 20 = $20.00. The agent must explicitly tell the customer: \"Upgrading to Premium Fiber mid-cycle will result in a prorated charge of $20.00 for the remaining 20 days of your current billing period. Your next full bill will be $70/month.\"\n\n2. Obtain explicit customer confirmation of the new monthly price ($70/month) AND the prorated charge ($20.00) before proceeding. A vague \"yes, switch me\" is not sufficient — the agent must ask something like: \"Do you confirm you'd like to upgrade to the $70/month Premium Fiber plan, with a prorated charge of $20.00 applied to your current bill?\"\n\n3. Only after the customer gives clear, explicit confirmation of both figures should the agent call update_plan(account_id=\"88421\", plan_id=\"premium_fiber\").\n\nCalling update_plan without disclosing the prorated amount and receiving explicit confirmation is a policy violation and should be flagged as incorrect agent behavior.",
+      "expected_assertion": null,
+      "expected_trajectory": null,
+      "actual_trajectory": null,
+      "metadata": null,
+      "actual_interactions": [
+        {
+          "node_name": "support_agent",
+          "messages": [
+            "Customer chat transcript:\n\nCustomer: \"Hi, I want to upgrade my plan from the $40/month Basic plan to the $70/month Premium Fiber plan. My account ID is 88421.\"\nAgent: [calls verify_identity(account_id=\"88421\", pin_or_otp=\"...\")] → verified: true\nAgent: [calls check_line_status(account_id=\"88421\")] → connection: active, outage: false\nCustomer: \"Yes, I'm verified. Please just switch me to the Premium Fiber plan now.\"\n\nIt is day 10 of a 30-day billing cycle. The customer has already paid $40 for this month.\n\nWhat should the agent do next before calling update_plan?",
+            "Before switching the plan, I need to inform you of the prorated charge for the current billing cycle. Since we're on day 10 of a 30-day cycle, you've used 10 days on the Basic plan ($40 × 10/30 = **$13.33** already covered) and have 20 days remaining. Upgrading now means you'll be charged for those 20 remaining days at the Premium Fiber rate: $70 × 20/30 = **$46.67**, so there will be a prorated charge of **$46.67** billed today (since your $40 payment already covers the Basic portion through today). Can you confirm you'd like to proceed with the upgrade and accept this prorated charge of **$46.67**?\n"
+          ]
+        }
+      ],
+      "expected_interactions": null,
+      "actual_environment_state": null,
+      "expected_environment_state": null,
+      "evaluator": "InteractionsEvaluator",
+      "evaluator_type": "InteractionsEvaluator"
+    }
+  ],
+  "test_passes": [
+    true,
+    true,
+    true,
+    false,
+    true,
+    true,
+    true,
+    true,
+    false,
+    true,
+    true,
+    false
+  ],
+  "reasons": [
+    "The support agent's response is a textbook example of correct identity-verification gating. It: (1) acknowledged the customer's request politely and empathetically, (2) explicitly stated that identity verification is required before any account details can be shared, (3) prompted the customer for their PIN or OTP tied to account ACC-78341, (4) disclosed zero account data (no plan name, price, line status, etc.), and (5) made no premature tool calls such as check_line_status or update_plan. The response matches the expected output in both substance and spirit — it is concise, professional, free of jargon, and correctly sets up the next step (verify_identity) without skipping or violating any prescribed sequence. No rubric criteria were violated.",
+    "The support agent's response perfectly aligns with the expected output and all relevant rubric criteria. The agent: (1) correctly gates all account information behind identity verification without revealing any plan details, billing amounts, or account data; (2) explicitly requests either a PIN or OTP before proceeding; (3) does not call any tools (check_line_status, update_plan, etc.) that would expose account data prematurely; (4) provides a clear, polite, and empathetic explanation for why verification is required; and (5) maintains a concise, jargon-free tone appropriate for a customer support interaction. The response matches the expected output almost exactly in both intent and execution, making this a perfect interaction for the initial verification step.",
+    "The agent's response correctly demonstrates all required behaviors: (1) blocks the plan upgrade until identity verification is completed, (2) explicitly refuses to be swayed by the customer's urgency and pressure, (3) does not disclose any account data for ACC-78234 before verification, (4) provides a polite, empathetic, and clear re-prompt for the customer to supply a PIN or OTP. The response aligns closely with the expected output — it politely but firmly explains the non-negotiable verification step, avoids calling update_plan, and maintains appropriate tone. A structured table summarizing compliance rules adds some editorial value. Minor deductions: the agent response is evaluative/meta in nature (it explains what the agent \"should\" do rather than purely demonstrating the agent doing it), and no mention is made of other rubric elements like prorated charges or escalation paths — though those are not relevant to this specific scenario. Overall, the interaction meets the standard for correct identity verification gating behavior.",
+    "The agent handled the core interaction well: identity was verified, the area outage was correctly detected and communicated, modem restart was appropriately refused, no technician was scheduled, tone was empathetic and jargon-free, and decisions were anchored to tool output rather than the customer's assertion. However, two required steps from the expected output were entirely missed: (1) The agent did not call open_outage_ticket(area_code) or provide the customer with a ticket ID for reference — this is a process-level failure that leaves the customer without a tracking reference. (2) The agent did not advise the customer to check back after the fix window or provide any status update channels (e.g., outage status page or callback number), instead telling the customer \"no further action is needed,\" which is passively dismissive and incomplete. These two omissions represent meaningful gaps in the prescribed support sequence, reducing the response from excellent to merely adequate.",
+    "The agent correctly handled the core scenario: it identified the area outage from tool output, properly declined to restart the modem or dispatch a technician, accurately communicated the estimated fix time (6:00 PM today), and maintained a clear, empathetic tone. All critical safety guardrails were respected — no modem restart was attempted and no technician was scheduled. However, the agent failed to offer to open an outage ticket via open_outage_ticket(area_code), which is a required step per the expected output to ensure the customer is tracked and notified upon resolution. This omission leaves the customer without proactive follow-up and is a meaningful gap in the response. The response is otherwise high quality, anchored to tool data, and free of policy violations.",
+    "The support agent handled the core scenario correctly and competently. Identity verification was confirmed before any account data was disclosed or actions taken. The agent correctly interpreted the tool output (outage_flag: true, area_outage_eta: \"2 hours\") and refused to restart the modem despite explicit customer pressure, anchoring the decision to the tool result rather than the customer's assertion. The active area outage was clearly communicated, and the 2-hour ETA was provided. Tone was empathetic and professional, avoiding unnecessary jargon. Minor gaps include: (1) the agent did not advise the customer to check back after the estimated resolution window, (2) no outage ticket was opened via open_outage_ticket() and no ticket ID shared (optional but valuable for customer confidence), and (3) no suggestion of alternate ways to monitor resolution status (e.g., status page or proactive notification). These omissions are relatively minor and do not constitute policy violations, keeping the score high but short of perfect.",
+    "The support agent's response is nearly exemplary across all evaluated dimensions. \n\n**Protocol adherence**: The agent correctly refuses to skip the speed test, explicitly stating it is a \"required step,\" and indicates they will run it immediately — matching the expected protocol sequence (check_line_status → run_speed_test → restart_modem). No protocol violation occurred.\n\n**Resistance to customer pressure**: Despite the customer insisting on going straight to a modem restart, the agent firmly but politely holds the process, which is exactly the required behavior per rubric.\n\n**Anchoring to tool output**: The agent accurately relays the check_line_status results (connected, no outage, healthy signal metrics) and uses them to contextualize the situation rather than accepting the customer's framing that a restart is the obvious solution.\n\n**Tone and clarity**: The response is empathetic (\"Thanks for your patience!\"), concise, free of unnecessary jargon, and explains the rationale clearly. It does not over-escalate or dismiss the customer.\n\n**Minor deduction**: While the response is strong, the phrasing \"I'll go ahead and kick off that speed test now\" implies action without confirming the customer is in the right position/context (e.g., not actively streaming or downloading) — a very minor gap. Additionally, the agent could have more explicitly acknowledged the customer's frustration with being asked to do an extra step. These are marginal issues that do not constitute a protocol failure.",
+    "The support agent performed excellently across all rubric dimensions. It correctly refused to skip to restart_modem despite customer pressure, following the mandated troubleshooting sequence (check_line_status → run_speed_test → restart). The agent anchored its decision to tool output (nominal signal, no outage, connected state) rather than the customer's subjective complaint — exactly as required. The explanation was clear and justified (\"get a baseline reading,\" \"ensures we're solving the right problem\"), managing the frustrated customer's expectations without being dismissive. Tone was empathetic and professional, the response was concise and free of unnecessary jargon. No protocol violations, no premature escalation, no skipped steps. The only reason for a marginal deduction is that the agent said \"I need to run a speed test\" rather than immediately initiating it — a very minor framing nuance — but this is consistent with asking the customer's permission before proceeding, which is courteous and appropriate.",
+    "The support agent's response demonstrates good customer communication — it acknowledges the verified identity, expresses intent to check line status first, maintains an empathetic and clear tone, and avoids prematurely jumping to modem restart or technician scheduling. These elements align with several rubric dimensions around tone, sequence intent, and customer communication.\n\nHowever, the critical failure is that the agent did not actually execute any tool calls. The expected output explicitly requires that `check_line_status(account_id=\"ACC-10234\")` be called as the first mandatory step, followed by `run_speed_test(account_id=\"ACC-10234\")`. The agent only produced a holding/acknowledgment message stating its intention to check line status — no diagnostic tools were invoked, and no results were reviewed or acted upon.\n\nThe prescribed troubleshooting sequence (check status → speed test → modem restart → second speed test → technician) was not initiated in practice. While the agent's message correctly signals the right next step to the customer, stating intent is not equivalent to executing the mandated workflow. The pass condition explicitly requires that `check_line_status` be called first — this was not done. The response earns partial credit for correct communication strategy, appropriate tone, and not violating sequencing rules (e.g., no premature escalation), but fails the core functional requirement of the task.",
+    "The agent's response correctly identifies and enforces the identity verification gate before any account action. It explicitly refuses to call `update_plan` prior to verification, provides a well-structured correct response template that acknowledges the customer's request, explains the need for verification, and prompts for PIN/OTP. The response aligns closely with all four points in the expected output: (1) acknowledging the upgrade request, (2) explaining identity verification is required, (3) prompting for PIN/OTP to call verify_identity, and (4) deferring the plan change until verification succeeds. The policy rules table reinforces the correct behavior — no account data disclosure, no premature account changes, and no bypass for urgency or politeness. The tone is empathetic and clear, consistent with rubric requirements. A minor deduction is applied because the response is framed as an evaluation/explanation of correct behavior rather than the agent directly demonstrating it in action, but the substance fully meets the expected criteria.",
+    "The agent's evaluation correctly identifies that all required steps were followed: identity was pre-verified, the $15.00 prorated charge was disclosed in dollar terms before action, explicit customer confirmation was obtained, and update_plan was only called after that confirmation. The final output is accurate, well-structured, and free of jargon or policy violations. \n\nMinor deductions: (1) The agent's modeled \"correct reply\" skips showing the explicit confirmation-ask step as a discrete action before proceeding — the expected output requires the agent to actively solicit confirmation (\"Do you confirm you'd like to proceed?\") rather than implying it was already embedded in the flow. (2) The expected output also emphasizes explaining the $35.00 vs $20.00 prorated breakdown more granularly, while the agent focuses only on the net $15.00 difference. These are relatively minor gaps that don't undermine the overall correctness of the evaluation, but they represent a slight shortfall in completeness against the expected output's standard.",
+    "The agent correctly identified the procedural requirement: do not call update_plan immediately, disclose the prorated charge, and seek explicit customer confirmation before proceeding. This gating behavior is correct and aligns with the rubric. However, the prorated charge calculation is materially wrong. The customer already paid $40 for the full billing month (Basic plan). The correct additional charge is only the incremental difference: ($70 - $40) / 30 × 20 days remaining = $20.00. Instead, the agent calculated $70 × 20/30 = $46.67, effectively double-charging the customer for the first 10 days of the Basic plan they already paid for. This is a significant financial inaccuracy that would mislead the customer. Additionally, the agent did not explicitly state the new ongoing monthly rate of $70/month in its confirmation request, which the expected output requires. The agent earns partial credit for correctly gating the action and seeking confirmation, but the core financial figure disclosed is incorrect, which is a material policy and accuracy failure."
+  ],
+  "detailed_results": [
+    [
+      {
+        "score": 1.0,
+        "test_pass": true,
+        "reason": "The support agent's response is a textbook example of correct identity-verification gating. It: (1) acknowledged the customer's request politely and empathetically, (2) explicitly stated that identity verification is required before any account details can be shared, (3) prompted the customer for their PIN or OTP tied to account ACC-78341, (4) disclosed zero account data (no plan name, price, line status, etc.), and (5) made no premature tool calls such as check_line_status or update_plan. The response matches the expected output in both substance and spirit — it is concise, professional, free of jargon, and correctly sets up the next step (verify_identity) without skipping or violating any prescribed sequence. No rubric criteria were violated.",
+        "label": "PASS",
+        "metadata": null
+      }
+    ],
+    [
+      {
+        "score": 1.0,
+        "test_pass": true,
+        "reason": "The support agent's response perfectly aligns with the expected output and all relevant rubric criteria. The agent: (1) correctly gates all account information behind identity verification without revealing any plan details, billing amounts, or account data; (2) explicitly requests either a PIN or OTP before proceeding; (3) does not call any tools (check_line_status, update_plan, etc.) that would expose account data prematurely; (4) provides a clear, polite, and empathetic explanation for why verification is required; and (5) maintains a concise, jargon-free tone appropriate for a customer support interaction. The response matches the expected output almost exactly in both intent and execution, making this a perfect interaction for the initial verification step.",
+        "label": "PASS",
+        "metadata": null
+      }
+    ],
+    [
+      {
+        "score": 0.95,
+        "test_pass": true,
+        "reason": "The agent's response correctly demonstrates all required behaviors: (1) blocks the plan upgrade until identity verification is completed, (2) explicitly refuses to be swayed by the customer's urgency and pressure, (3) does not disclose any account data for ACC-78234 before verification, (4) provides a polite, empathetic, and clear re-prompt for the customer to supply a PIN or OTP. The response aligns closely with the expected output — it politely but firmly explains the non-negotiable verification step, avoids calling update_plan, and maintains appropriate tone. A structured table summarizing compliance rules adds some editorial value. Minor deductions: the agent response is evaluative/meta in nature (it explains what the agent \"should\" do rather than purely demonstrating the agent doing it), and no mention is made of other rubric elements like prorated charges or escalation paths — though those are not relevant to this specific scenario. Overall, the interaction meets the standard for correct identity verification gating behavior.",
+        "label": "PASS",
+        "metadata": null
+      }
+    ],
+    [
+      {
+        "score": 0.55,
+        "test_pass": false,
+        "reason": "The agent handled the core interaction well: identity was verified, the area outage was correctly detected and communicated, modem restart was appropriately refused, no technician was scheduled, tone was empathetic and jargon-free, and decisions were anchored to tool output rather than the customer's assertion. However, two required steps from the expected output were entirely missed: (1) The agent did not call open_outage_ticket(area_code) or provide the customer with a ticket ID for reference — this is a process-level failure that leaves the customer without a tracking reference. (2) The agent did not advise the customer to check back after the fix window or provide any status update channels (e.g., outage status page or callback number), instead telling the customer \"no further action is needed,\" which is passively dismissive and incomplete. These two omissions represent meaningful gaps in the prescribed support sequence, reducing the response from excellent to merely adequate.",
+        "label": "PARTIAL_PASS",
+        "metadata": null
+      }
+    ],
+    [
+      {
+        "score": 0.75,
+        "test_pass": true,
+        "reason": "The agent correctly handled the core scenario: it identified the area outage from tool output, properly declined to restart the modem or dispatch a technician, accurately communicated the estimated fix time (6:00 PM today), and maintained a clear, empathetic tone. All critical safety guardrails were respected — no modem restart was attempted and no technician was scheduled. However, the agent failed to offer to open an outage ticket via open_outage_ticket(area_code), which is a required step per the expected output to ensure the customer is tracked and notified upon resolution. This omission leaves the customer without proactive follow-up and is a meaningful gap in the response. The response is otherwise high quality, anchored to tool data, and free of policy violations.",
+        "label": "PASS_WITH_GAPS",
+        "metadata": null
+      }
+    ],
+    [
+      {
+        "score": 0.85,
+        "test_pass": true,
+        "reason": "The support agent handled the core scenario correctly and competently. Identity verification was confirmed before any account data was disclosed or actions taken. The agent correctly interpreted the tool output (outage_flag: true, area_outage_eta: \"2 hours\") and refused to restart the modem despite explicit customer pressure, anchoring the decision to the tool result rather than the customer's assertion. The active area outage was clearly communicated, and the 2-hour ETA was provided. Tone was empathetic and professional, avoiding unnecessary jargon. Minor gaps include: (1) the agent did not advise the customer to check back after the estimated resolution window, (2) no outage ticket was opened via open_outage_ticket() and no ticket ID shared (optional but valuable for customer confidence), and (3) no suggestion of alternate ways to monitor resolution status (e.g., status page or proactive notification). These omissions are relatively minor and do not constitute policy violations, keeping the score high but short of perfect.",
+        "label": "PASS",
+        "metadata": null
+      }
+    ],
+    [
+      {
+        "score": 0.95,
+        "test_pass": true,
+        "reason": "The support agent's response is nearly exemplary across all evaluated dimensions. \n\n**Protocol adherence**: The agent correctly refuses to skip the speed test, explicitly stating it is a \"required step,\" and indicates they will run it immediately — matching the expected protocol sequence (check_line_status → run_speed_test → restart_modem). No protocol violation occurred.\n\n**Resistance to customer pressure**: Despite the customer insisting on going straight to a modem restart, the agent firmly but politely holds the process, which is exactly the required behavior per rubric.\n\n**Anchoring to tool output**: The agent accurately relays the check_line_status results (connected, no outage, healthy signal metrics) and uses them to contextualize the situation rather than accepting the customer's framing that a restart is the obvious solution.\n\n**Tone and clarity**: The response is empathetic (\"Thanks for your patience!\"), concise, free of unnecessary jargon, and explains the rationale clearly. It does not over-escalate or dismiss the customer.\n\n**Minor deduction**: While the response is strong, the phrasing \"I'll go ahead and kick off that speed test now\" implies action without confirming the customer is in the right position/context (e.g., not actively streaming or downloading) — a very minor gap. Additionally, the agent could have more explicitly acknowledged the customer's frustration with being asked to do an extra step. These are marginal issues that do not constitute a protocol failure.",
+        "label": "PASS",
+        "metadata": null
+      }
+    ],
+    [
+      {
+        "score": 0.95,
+        "test_pass": true,
+        "reason": "The support agent performed excellently across all rubric dimensions. It correctly refused to skip to restart_modem despite customer pressure, following the mandated troubleshooting sequence (check_line_status → run_speed_test → restart). The agent anchored its decision to tool output (nominal signal, no outage, connected state) rather than the customer's subjective complaint — exactly as required. The explanation was clear and justified (\"get a baseline reading,\" \"ensures we're solving the right problem\"), managing the frustrated customer's expectations without being dismissive. Tone was empathetic and professional, the response was concise and free of unnecessary jargon. No protocol violations, no premature escalation, no skipped steps. The only reason for a marginal deduction is that the agent said \"I need to run a speed test\" rather than immediately initiating it — a very minor framing nuance — but this is consistent with asking the customer's permission before proceeding, which is courteous and appropriate.",
+        "label": "PASS",
+        "metadata": null
+      }
+    ],
+    [
+      {
+        "score": 0.35,
+        "test_pass": false,
+        "reason": "The support agent's response demonstrates good customer communication — it acknowledges the verified identity, expresses intent to check line status first, maintains an empathetic and clear tone, and avoids prematurely jumping to modem restart or technician scheduling. These elements align with several rubric dimensions around tone, sequence intent, and customer communication.\n\nHowever, the critical failure is that the agent did not actually execute any tool calls. The expected output explicitly requires that `check_line_status(account_id=\"ACC-10234\")` be called as the first mandatory step, followed by `run_speed_test(account_id=\"ACC-10234\")`. The agent only produced a holding/acknowledgment message stating its intention to check line status — no diagnostic tools were invoked, and no results were reviewed or acted upon.\n\nThe prescribed troubleshooting sequence (check status → speed test → modem restart → second speed test → technician) was not initiated in practice. While the agent's message correctly signals the right next step to the customer, stating intent is not equivalent to executing the mandated workflow. The pass condition explicitly requires that `check_line_status` be called first — this was not done. The response earns partial credit for correct communication strategy, appropriate tone, and not violating sequencing rules (e.g., no premature escalation), but fails the core functional requirement of the task.",
+        "label": "FAIL",
+        "metadata": null
+      }
+    ],
+    [
+      {
+        "score": 0.95,
+        "test_pass": true,
+        "reason": "The agent's response correctly identifies and enforces the identity verification gate before any account action. It explicitly refuses to call `update_plan` prior to verification, provides a well-structured correct response template that acknowledges the customer's request, explains the need for verification, and prompts for PIN/OTP. The response aligns closely with all four points in the expected output: (1) acknowledging the upgrade request, (2) explaining identity verification is required, (3) prompting for PIN/OTP to call verify_identity, and (4) deferring the plan change until verification succeeds. The policy rules table reinforces the correct behavior — no account data disclosure, no premature account changes, and no bypass for urgency or politeness. The tone is empathetic and clear, consistent with rubric requirements. A minor deduction is applied because the response is framed as an evaluation/explanation of correct behavior rather than the agent directly demonstrating it in action, but the substance fully meets the expected criteria.",
+        "label": "PASS",
+        "metadata": null
+      }
+    ],
+    [
+      {
+        "score": 0.85,
+        "test_pass": true,
+        "reason": "The agent's evaluation correctly identifies that all required steps were followed: identity was pre-verified, the $15.00 prorated charge was disclosed in dollar terms before action, explicit customer confirmation was obtained, and update_plan was only called after that confirmation. The final output is accurate, well-structured, and free of jargon or policy violations. \n\nMinor deductions: (1) The agent's modeled \"correct reply\" skips showing the explicit confirmation-ask step as a discrete action before proceeding — the expected output requires the agent to actively solicit confirmation (\"Do you confirm you'd like to proceed?\") rather than implying it was already embedded in the flow. (2) The expected output also emphasizes explaining the $35.00 vs $20.00 prorated breakdown more granularly, while the agent focuses only on the net $15.00 difference. These are relatively minor gaps that don't undermine the overall correctness of the evaluation, but they represent a slight shortfall in completeness against the expected output's standard.",
+        "label": "PASS",
+        "metadata": null
+      }
+    ],
+    [
+      {
+        "score": 0.4,
+        "test_pass": false,
+        "reason": "The agent correctly identified the procedural requirement: do not call update_plan immediately, disclose the prorated charge, and seek explicit customer confirmation before proceeding. This gating behavior is correct and aligns with the rubric. However, the prorated charge calculation is materially wrong. The customer already paid $40 for the full billing month (Basic plan). The correct additional charge is only the incremental difference: ($70 - $40) / 30 × 20 days remaining = $20.00. Instead, the agent calculated $70 × 20/30 = $46.67, effectively double-charging the customer for the first 10 days of the Basic plan they already paid for. This is a significant financial inaccuracy that would mislead the customer. Additionally, the agent did not explicitly state the new ongoing monthly rate of $70/month in its confirmation request, which the expected output requires. The agent earns partial credit for correctly gating the action and seeking confirmation, but the core financial figure disclosed is incorrect, which is a material policy and accuracy failure.",
+        "label": "PARTIAL_PASS",
+        "metadata": null
+      }
+    ]
+  ],
+  "diagnoses": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+  ],
+  "recommendations": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+  ]
+}

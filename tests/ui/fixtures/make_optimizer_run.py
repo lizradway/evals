@@ -10,10 +10,18 @@ stands in for a real run until the record layer lands. Regenerate with:
 Everything here is deterministic: fixed timestamps, fixed scores, no RNG. The story is a run that
 improves in fits and starts, because a monotonically improving run would not exercise the
 best-so-far line, and one with no gaps would not exercise an objective of None.
+
+The same run is the one checked in under `examples/`, written there with every transcript present:
+
+    python tests/ui/fixtures/make_optimizer_run.py examples/optimizer-run --all-transcripts
+
+A missing transcript is a state the page has to handle and so is in the fixture on purpose; in a
+directory someone opens to see what the UI looks like it is a file that simply failed to arrive.
 """
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 from datetime import datetime, timedelta, timezone
@@ -602,8 +610,8 @@ EFFECTS = {
 }
 
 
-def main() -> None:
-    OUT.mkdir(parents=True, exist_ok=True)
+def main(out: Path = OUT, *, all_transcripts: bool = False) -> None:
+    out.mkdir(parents=True, exist_ok=True)
     clock = [START]
 
     def stamp(seconds: int = 7) -> str:
@@ -619,7 +627,7 @@ def main() -> None:
         "schema_version": 1,
         "run_id": RUN_ID,
         "name": "support-tuning",
-        "workdir": "/home/liz/support-agent",
+        "workdir": "/srv/northwind-support",
         "objective": OBJECTIVE,
         "constraints": CONSTRAINTS,
         "is_pareto": False,
@@ -634,7 +642,7 @@ def main() -> None:
         "agent_failure_score": "worst",
         "feasibility_threshold": 0.9,
     }
-    (OUT / "run.json").write_text(json.dumps(config, indent=2) + "\n")
+    (out / "run.json").write_text(json.dumps(config, indent=2) + "\n")
     emit("config", 0, **config)
 
     by_iteration: dict[int, list[dict]] = {}
@@ -942,29 +950,39 @@ def main() -> None:
     emit("stop", 5, reason="iterations", message="reached max_iterations=6")
 
     lines = "".join(json.dumps(e) + "\n" for e in events)
-    (OUT / "events.jsonl").write_text(lines)
+    (out / "events.jsonl").write_text(lines)
 
     # `transcripts/<hash>.json`, one per distinct trajectory, as the run directory holds them.
     # Rewritten from scratch so a hash that no trial points at any more does not linger.
-    held = OUT / "transcripts"
+    held = out / "transcripts"
     for stale in sorted(held.glob("*.json")) if held.is_dir() else []:
         stale.unlink()
     held.mkdir(exist_ok=True)
-    unwritten = hashlib.sha256("/".join(LEFT_UNWRITTEN).encode()).hexdigest()[:16]
+    unwritten = None if all_transcripts else hashlib.sha256("/".join(LEFT_UNWRITTEN).encode()).hexdigest()[:16]
     for digest, document in sorted(DOCUMENTS.items()):
         if digest == unwritten:
             continue
         (held / f"{digest}.json").write_text(json.dumps(document, indent=1) + "\n")
 
     # `effects.json`, fitted after the fact, which is why a run can have a record and no model.
-    (OUT / "effects.json").write_text(json.dumps(EFFECTS, indent=2) + "\n")
+    (out / "effects.json").write_text(json.dumps(EFFECTS, indent=2) + "\n")
 
-    print(f"wrote {OUT}/events.jsonl: {len(events)} events, {len(lines)} bytes")
-    print(f"      {OUT}/run.json")
-    print(f"      {OUT}/transcripts/: {len(DOCUMENTS) - 1} files, 1 pointer left unwritten on purpose")
-    print(f"      {OUT}/effects.json: {len(EFFECTS['effects'])} estimates over {len(EFFECTS['goals'])} goals")
+    kept = len(DOCUMENTS) if all_transcripts else len(DOCUMENTS) - 1
+    gap = "" if all_transcripts else ", 1 pointer left unwritten on purpose"
+    print(f"wrote {out}/events.jsonl: {len(events)} events, {len(lines)} bytes")
+    print(f"      {out}/run.json")
+    print(f"      {out}/transcripts/: {kept} files{gap}")
+    print(f"      {out}/effects.json: {len(EFFECTS['effects'])} estimates over {len(EFFECTS['goals'])} goals")
     print(f"      rollouts spent {spent} of {MAX_ROLLOUTS}, champion c10")
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("out", nargs="?", type=Path, default=OUT, help=f"run directory to write (default: {OUT})")
+    parser.add_argument(
+        "--all-transcripts",
+        action="store_true",
+        help="write the transcript one trial points at and the fixture deliberately leaves missing",
+    )
+    args = parser.parse_args()
+    main(args.out, all_transcripts=args.all_transcripts)

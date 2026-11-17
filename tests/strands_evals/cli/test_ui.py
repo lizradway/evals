@@ -1068,3 +1068,78 @@ def test_ui_rejects_a_path_that_is_not_a_directory(tmp_path: Path, capsys):
     target = _write(tmp_path / "experiment.json", _experiment("a"))
     assert main(["ui", str(target), "--list"]) == 2
     assert "not a directory" in capsys.readouterr().err
+
+
+# ── the checked-in examples ──
+#
+# `examples/` exists to be opened with `strands-evals ui examples`, and what makes it worth
+# checking in is that it is complete: four experiments, a measured report for each, and a run
+# directory. All three of those are things this command decides about, so the directory is
+# asserted through `discover` rather than by eye — an example that stopped pairing, or a report
+# a schema change left unreadable, is a demo that fails in front of whoever was shown it.
+
+EXAMPLES = Path(__file__).resolve().parents[3] / "examples"
+
+
+def test_the_examples_directory_is_a_complete_demo():
+    """Four experiments, each paired with its own report, and nothing the scan had to skip."""
+    result = discover(EXAMPLES)
+
+    assert result.skipped == []
+    runs = {run["id"]: run for run in result.runs}
+    assert set(runs) == {
+        "experiments/code_migration.json",
+        "experiments/refund_desk.json",
+        "experiments/refund_desk_adversarial.json",
+        "experiments/telecom.json",
+    }
+    for name, run in runs.items():
+        assert run["report"] is not None, f"{name} has no report beside it"
+        # The report was measured against that experiment's cases, so the case ids match. A
+        # report copied from elsewhere, or one left behind by an edited experiment, would not.
+        assert run["link"]["status"] == "verified", f"{name}: {run['link']}"
+
+
+def test_every_example_experiment_and_report_still_loads():
+    """The library's own loaders, so a type change to either shape fails here and not in a demo."""
+    from strands_evals.experiment import Experiment
+    from strands_evals.types.evaluation_report import EvaluationReport
+
+    experiments = sorted(EXAMPLES.glob("experiments/*.json"))
+    assert [p.name for p in experiments if not p.name.endswith(".report.json")]
+
+    for path in experiments:
+        document = json.loads(path.read_text())
+        if path.name.endswith(".report.json"):
+            report = EvaluationReport.model_validate(document)
+            assert report.cases and len(report.scores) == len(report.cases)
+            # Scored by a judge against an agent's answer: every case carries what it answered.
+            assert all(case.get("actual_output") for case in report.cases)
+        else:
+            assert Experiment.from_dict(document).cases
+
+
+def test_the_example_run_holds_every_transcript_it_points_at():
+    """The one difference from the test fixture, which leaves a pointer dangling on purpose.
+
+    A missing transcript is a state the page has to say something about, so the fixture has one.
+    In `examples/` it would be a reader's first impression of a run directory, and "this file is
+    not here" is not the impression the directory is checked in to give.
+    """
+    runs = discover_optimizer_runs(EXAMPLES)
+
+    assert len(runs) == 1
+    run = runs[0]
+    assert run["champion_id"] == "c10"
+    # Scored on the held-out split, so the result the page shows is the stronger claim.
+    assert run["result"]["held_out"] is True
+
+    log = read_event_log(EXAMPLES / run["dir"] / "events.jsonl")
+    pointers = {
+        record["transcript"]["hash"]
+        for event in log.events
+        if isinstance(record := event.get("record"), dict) and isinstance(record.get("transcript"), dict)
+    }
+    assert pointers
+    held = {path.stem for path in (EXAMPLES / run["dir"] / "transcripts").glob("*.json")}
+    assert pointers - held == set()
